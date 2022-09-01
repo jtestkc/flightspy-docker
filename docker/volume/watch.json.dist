@@ -1,0 +1,38 @@
+[
+  {
+    "api-key": "your-api-key",
+    "from": "FRA-sky",
+    "to": "TXL-sky",
+    "departure": "2022-09-27",
+    "arrival": "2022-11-16",
+    "max-price": "3500",
+    "country": "BR",
+    "currency": "BRL",
+    "locale": "pt-BR",
+    "adults": "1"
+  },
+  {
+    "from": "SAO-sky",
+    "to": "FRA-sky",
+    "departure": "2022-09-27",
+    "arrival": "2022-09-27",
+    "max-price": "10000",
+    "country": "BR",
+    "currency": "BRL",
+    "locale": "pt-BR",
+    "adults": "2"
+  },
+  {
+    "from": "DUS-sky",
+    "to": "FLN-sky",
+    "search-period-from": "2022-09-27",
+    "search-period-to": "2022-09-27",
+    "search-period-travel-days": 20,
+    "max-price": "2500",
+    "currency": "EUR",
+    "country": "DE",
+    "locale": "de-DE",
+    "adults": "2",
+    "children": "2"
+  }
+]

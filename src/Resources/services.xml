@@ -1,0 +1,173 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <imports>
+        <import resource="config/notifiers.xml"/>
+        <import resource="config/services.xml"/>
+    </imports>
+
+    <parameters>
+        <parameter key="resourcesDir">src/Resources</parameter>
+    </parameters>
+
+    <services>
+        <service id="jeancsil_flight_spy.facade.deal_processor"
+                 class="Jeancsil\FlightSpy\Facade\AbstractDealProcessor"
+                 abstract="true">
+            <argument type="service" id="jeancsil_flight_spy.api_data_transfer.session_parameters_factory" />
+            <argument type="service" id="jeancsil_flight_spy.api.flights.live_price" />
+            <argument type="service" id="jeancsil_flight_spy.api_processor.live_prices" />
+        </service>
+
+        <service id="jeancsil_flight_spy.facade.multi_deal"
+                 class="Jeancsil\FlightSpy\Facade\MultiDealFacade"
+                 parent="jeancsil_flight_spy.facade.deal_processor" />
+
+
+        <service id="jeancsil_flight_spy.validator.command_line_parameter"
+                 class="Jeancsil\FlightSpy\Validator\CommandLineParameterValidator"
+                 public="true">
+        </service>
+
+        <service id="jeancsil_flight_spy.api.flights.live_price"
+                 class="Jeancsil\FlightSpy\Api\Flights\LivePrice"
+                 public="true">
+            <call method="setTransport">
+                <argument type="service" id="jeancsil_flight_spy.api_http.transport" />
+            </call>
+        </service>
+
+        <service id="jeancsil_flight_spy.api_http.transport"
+                 class="Jeancsil\FlightSpy\Api\Http\Transport"
+                 public="true">
+            <argument type="service" id="jeancsil_flight_spy.http_client" />
+            <call method="setElasticSearchWriter">
+                <argument type="service" id="jeancsil_flight_spy.writer.history.elasticSearch" />
+            </call>
+            <call method="setLogger">
+                <argument type="service" id="jeancsil_flight_spy.logger.log" />
+            </call>
+        </service>
+
+        <service id="jeancsil_flight_spy.api_http.fake_transport"
+                 class="Jeancsil\FlightSpy\Api\Http\FakeTransport"
+                 public="true">
+            <argument>%resourcesDir%</argument>
+        </service>
+
+        <service id="jeancsil_flight_spy.api_data_transfer.session_parameters_factory"
+                 class="Jeancsil\FlightSpy\Api\DataTransfer\SessionParametersFactory"
+                 public="true">
+            <argument>%jeancsil.flightspy.api.key%</argument>
+            <call method="setLogger">
+                <argument type="service" id="jeancsil_flight_spy.logger.array_logger" />
+            </call>
+        </service>
+
+        <service id="jeancsil_flight_spy.api_processor.live_prices"
+                 class="Jeancsil\FlightSpy\Api\Processor\LivePricePostProcessor"
+                 public="true">
+            <argument type="service" id="jeancsil_flight_spy.service.formatter.price" />
+            <call method="addNotifier">
+                <argument type="service" id="jeancsil_flight_spy.notifier.email" />
+            </call>
+            <call method="addNotifier">
+                <argument type="service" id="jeancsil_flight_spy.notifier.slack" />
+            </call>
+            <call method="setLogger">
+                <argument type="service" id="jeancsil_flight_spy.logger.log" />
+            </call>
+        </service>
+
+        <!-- Guzzle -->
+        <service id="jeancsil_flight_spy.http_client"
+                 class="GuzzleHttp\Client"
+                 public="true">
+            <argument>%jeancsil.flightspy.http.client.config%</argument>
+        </service>
+
+        <!-- ElasticSearch -->
+        <service id="jeancsil_flight_spy.writer.history.elasticSearch"
+                 class="Jeancsil\FlightSpy\Service\ElasticSearch\ElasticSearchWriter">
+            <call method="configureIndex">
+                <argument>%jeancsil.flightspy.elasticsearch.indexName%</argument>
+            </call>
+
+            <call method="configureType">
+                <argument>%jeancsil.flightspy.elasticsearch.historyType%</argument>
+            </call>
+        </service>
+
+        <service id="jeancsil_flight_spy.writer.notification.elasticSearch"
+                 class="Jeancsil\FlightSpy\Service\ElasticSearch\ElasticSearchWriter">
+            <call method="configureIndex">
+                <argument>%jeancsil.flightspy.elasticsearch.indexName%</argument>
+            </call>
+
+            <call method="configureType">
+                <argument>%jeancsil.flightspy.elasticsearch.notificationType%</argument>
+            </call>
+        </service>
+
+        <service id="jeancsil_flight_spy.requester.elasticSearch"
+                 class="Jeancsil\FlightSpy\Service\ElasticSearch\ElasticSearchRequester">
+            <call method="configureIndex">
+                <argument>%jeancsil.flightspy.elasticsearch.indexName%</argument>
+            </call>
+
+            <call method="configureType">
+                <argument>%jeancsil.flightspy.elasticsearch.notificationType%</argument>
+            </call>
+        </service>
+
+        <!-- Log -->
+        <service id="jeancsil_flight_spy.logger.file"
+                 class="Monolog\Handler\StreamHandler">
+            <argument>/tmp/skyscanner.log</argument>
+            <argument type="constant">Monolog\Logger::DEBUG</argument>
+
+            <call method="setFormatter">
+                <argument type="service" id="jeancsil_flight_spy.logger.formatter" />
+            </call>
+        </service>
+
+        <service id="jeancsil_flight_spy.logger.stdout"
+                 class="Monolog\Handler\StreamHandler">
+            <argument>php://stdout</argument>
+            <argument type="constant">Monolog\Logger::DEBUG</argument>
+
+            <call method="setFormatter">
+                <argument type="service" id="jeancsil_flight_spy.logger.formatter" />
+            </call>
+        </service>
+
+        <service id="jeancsil_flight_spy.logger.array_logger"
+                 class="Jeancsil\FlightSpy\Log\ArrayLogger">
+            <argument>skyscanner</argument>
+            <call method="pushHandler">
+                <argument type="service" id="jeancsil_flight_spy.logger.file" />
+            </call>
+            <call method="pushHandler">
+                <argument type="service" id="jeancsil_flight_spy.logger.stdout" />
+            </call>
+        </service>
+
+        <service id="jeancsil_flight_spy.logger.log"
+                 class="Monolog\Logger">
+            <argument>skyscanner</argument>
+            <call method="pushHandler">
+                <argument type="service" id="jeancsil_flight_spy.logger.file" />
+            </call>
+            <call method="pushHandler">
+                <argument type="service" id="jeancsil_flight_spy.logger.stdout" />
+            </call>
+        </service>
+
+        <service id="jeancsil_flight_spy.logger.formatter"
+                 class="Jeancsil\FlightSpy\Log\MultiLineFormatter">
+        </service>
+    </services>
+</container>

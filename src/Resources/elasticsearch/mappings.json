@@ -1,0 +1,63 @@
+{
+  "history": {
+    "properties": {
+      "Creation": {
+        "type": "date"
+      },
+      "SessionKey": {
+        "type": "keyword"
+      },
+      "Status": {
+        "type": "keyword"
+      },
+      "Departure": {
+        "type": "date"
+      },
+      "Arrival": {
+        "type": "date"
+      },
+      "Price": {
+        "type": "float"
+      },
+      "PriceFormatted": {
+        "type": "keyword"
+      },
+      "InboundAirline": {
+        "type": "keyword"
+      },
+      "OutboundAirline": {
+        "type": "keyword"
+      },
+      "DeeplinkUrl": {
+        "type": "keyword"
+      },
+      "Adults": {
+        "type": "short"
+      },
+      "Children": {
+        "type": "short"
+      },
+      "Infants": {
+        "type": "short"
+      },
+      "CabinClass": {
+        "type": "keyword"
+      },
+      "Country": {
+        "type": "keyword"
+      },
+      "OriginPlace": {
+        "type": "keyword"
+      },
+      "DestinationPlace": {
+        "type": "keyword"
+      },
+      "Locale": {
+        "type": "keyword"
+      },
+      "GroupPricing": {
+        "type": "boolean"
+      }
+    }
+  }
+}
